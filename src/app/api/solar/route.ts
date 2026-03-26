@@ -1,0 +1,37 @@
+import { NextResponse } from "next/server";
+
+export async function GET() {
+  try {
+    // Amsterdam coordinates
+    const lat = 52.37;
+    const lon = 4.9;
+
+    const res = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation&forecast_days=1`,
+      { next: { revalidate: 900 } } // cache 15 minutes
+    );
+
+    if (!res.ok) {
+      throw new Error(`Open-Meteo API error: ${res.status}`);
+    }
+
+    const data = await res.json();
+    const hourlyRadiation: number[] = data.hourly?.shortwave_radiation ?? [];
+
+    // Get current hour's irradiance
+    const now = new Date();
+    const currentHour = now.getUTCHours() + 1; // Amsterdam is UTC+1 (approximate)
+    const currentIrradiance = hourlyRadiation[currentHour] ?? 0;
+
+    return NextResponse.json({
+      currentIrradiance,
+      hourlyForecast: hourlyRadiation.slice(0, 25),
+    });
+  } catch (error) {
+    console.error("Solar API error:", error);
+    return NextResponse.json(
+      { currentIrradiance: 25, hourlyForecast: new Array(25).fill(0) },
+      { status: 200 }
+    );
+  }
+}
