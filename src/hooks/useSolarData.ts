@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { getSolarMood } from "@/lib/constants";
 import type { SolarData } from "@/lib/types";
 
-export function useSolarData(): SolarData {
+export function useSolarData(lat: number, lon: number): SolarData {
   const [data, setData] = useState<SolarData>({
     currentIrradiance: 25,
     hourlyForecast: new Array(25).fill(0),
@@ -15,7 +15,7 @@ export function useSolarData(): SolarData {
   useEffect(() => {
     async function fetchSolarData() {
       try {
-        const res = await fetch("/api/solar");
+        const res = await fetch(`/api/solar?lat=${lat}&lon=${lon}`);
         const json = await res.json();
         const mood = getSolarMood(json.currentIrradiance);
         setData({
@@ -31,7 +31,7 @@ export function useSolarData(): SolarData {
     fetchSolarData();
     const interval = setInterval(fetchSolarData, 15 * 60 * 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [lat, lon]);
 
   return data;
 }

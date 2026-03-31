@@ -1,5 +1,8 @@
 "use client";
 
+import { useState } from "react";
+import { LOCATIONS } from "@/lib/constants";
+import type { Location } from "@/lib/constants";
 import { useSolarData } from "@/hooks/useSolarData";
 import { useRadioStream } from "@/hooks/useRadioStream";
 import Background from "./Background";
@@ -11,8 +14,10 @@ import ForecastChart from "./ForecastChart";
 import LocationBadge from "./LocationBadge";
 
 export default function SolarRadio() {
+  const [location, setLocation] = useState<Location>(LOCATIONS[0]);
+
   const { currentIrradiance, hourlyForecast, description, genre } =
-    useSolarData();
+    useSolarData(location.lat, location.lon);
 
   const radio = useRadioStream(genre);
 
@@ -24,7 +29,7 @@ export default function SolarRadio() {
       <div className="relative z-10 flex items-center justify-center w-full min-h-screen py-[40px] px-[24px]">
         <div className="flex flex-col gap-[40px] items-center w-full max-w-[447.5px]">
           {/* Location badge - at top */}
-          <LocationBadge />
+          <LocationBadge location={location} onLocationChange={setLocation} />
 
           {/* Glass card */}
           <div className="flex flex-col gap-[24px] items-center px-[16px] py-[32px] md:px-[24px] md:py-[40px] w-full bg-white/10 rounded-[24px]">

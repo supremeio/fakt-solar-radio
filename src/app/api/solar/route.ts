@@ -1,10 +1,10 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Amsterdam coordinates
-    const lat = 52.37;
-    const lon = 4.9;
+    const { searchParams } = request.nextUrl;
+    const lat = parseFloat(searchParams.get("lat") ?? "52.37");
+    const lon = parseFloat(searchParams.get("lon") ?? "4.9");
 
     const res = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation&forecast_days=1`,
