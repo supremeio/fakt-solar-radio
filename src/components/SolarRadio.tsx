@@ -23,6 +23,9 @@ export default function SolarRadio() {
       {/* Main content container - centered */}
       <div className="relative z-10 flex items-center justify-center w-full min-h-screen py-[40px] px-[24px]">
         <div className="flex flex-col gap-[40px] items-center w-full max-w-[447.5px]">
+          {/* Location badge - at top */}
+          <LocationBadge />
+
           {/* Glass card */}
           <div className="flex flex-col gap-[24px] items-center px-[16px] py-[32px] md:px-[24px] md:py-[40px] w-full bg-white/10 rounded-[24px]">
             <SolarGauge value={currentIrradiance} />
@@ -38,17 +41,12 @@ export default function SolarRadio() {
                 isMuted={radio.isMuted}
                 onTogglePlay={radio.togglePlay}
                 onToggleMute={radio.toggleMute}
-                onNext={radio.nextStation}
-                onPrev={radio.prevStation}
               />
             </div>
           </div>
 
           {/* Forecast section */}
-          <div className="flex flex-col gap-[48px] items-center w-full">
-            <ForecastChart hourlyData={hourlyForecast} />
-            <LocationBadge />
-          </div>
+          <ForecastChart hourlyData={hourlyForecast} />
         </div>
       </div>
     </div>

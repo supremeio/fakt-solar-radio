@@ -3,8 +3,6 @@ interface PlayerControlsProps {
   isMuted: boolean;
   onTogglePlay: () => void;
   onToggleMute: () => void;
-  onNext: () => void;
-  onPrev: () => void;
 }
 
 export default function PlayerControls({
@@ -12,42 +10,45 @@ export default function PlayerControls({
   isMuted,
   onTogglePlay,
   onToggleMute,
-  onNext,
-  onPrev,
 }: PlayerControlsProps) {
   return (
     <div className="flex flex-col gap-[24px] items-center w-full">
-      {/* Progress bar */}
-      <div className="flex gap-[8px] items-center w-full">
-        <p className="font-medium text-[16px] leading-normal text-white text-center whitespace-nowrap">
-          {isPlaying ? "LIVE" : "0:00"}
-        </p>
-        <div className="relative flex-1 h-[8px]">
-          <div className="absolute inset-0 bg-white/20 rounded-[40px]" />
-          <div
-            className={`absolute top-0 left-0 h-[8px] bg-white rounded-[40px] transition-all duration-500 ${
-              isPlaying ? "w-full" : "w-1/3"
-            }`}
-          />
+      {/* Time Label Container */}
+      <div className="flex gap-[12px] items-center justify-center w-full">
+        {/* Time Info */}
+        <div className="flex flex-1 gap-[8px] items-center">
+          <p className="font-medium text-[16px] leading-normal text-white text-center whitespace-nowrap">
+            {isPlaying ? "LIVE" : "0:00"}
+          </p>
+          <div className="relative flex-1 h-[8px]">
+            <div className="absolute inset-0 bg-white/20 rounded-[40px]" />
+            <div
+              className={`absolute top-0 left-0 h-[8px] bg-white rounded-[40px] transition-all duration-500 ${
+                isPlaying ? "w-full" : "w-1/3"
+              }`}
+            />
+          </div>
+          <p className="font-medium text-[16px] leading-normal text-white text-center whitespace-nowrap">
+            {isPlaying ? "∞" : "Live"}
+          </p>
         </div>
-        <p className="font-medium text-[16px] leading-normal text-white text-center whitespace-nowrap">
-          {isPlaying ? "∞" : "2:23"}
-        </p>
+        {/* Mute Control */}
+        <button
+          onClick={onToggleMute}
+          className="flex gap-[4px] items-center cursor-pointer transition-opacity hover:opacity-70"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src="/images/speaker-off-icon.svg"
+            alt={isMuted ? "Unmute" : "Mute"}
+            className={`w-[20px] h-[20px] flex-shrink-0 ${isMuted ? "opacity-50" : ""}`}
+          />
+        </button>
       </div>
 
-      {/* Playback controls */}
+      {/* Playback Controls */}
       <div className="flex flex-col gap-[16px] items-center w-[148px]">
-        {/* Transport buttons */}
-        <div className="flex gap-[24px] items-center w-full">
-          {/* Previous */}
-          <button
-            onClick={onPrev}
-            className="w-[24px] h-[24px] flex-shrink-0 cursor-pointer transition-opacity hover:opacity-70"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/previous-icon.svg" alt="Previous" className="w-full h-full" />
-          </button>
-
+        <div className="flex gap-[24px] items-center justify-center">
           {/* Play/Pause */}
           <button
             onClick={onTogglePlay}
@@ -64,32 +65,7 @@ export default function PlayerControls({
               <img src="/images/play-button.svg" alt="Play" className="w-full h-full" />
             )}
           </button>
-
-          {/* Next */}
-          <button
-            onClick={onNext}
-            className="w-[24px] h-[24px] flex-shrink-0 cursor-pointer transition-opacity hover:opacity-70"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/images/next-icon.svg" alt="Next" className="w-full h-full" />
-          </button>
         </div>
-
-        {/* Mute control */}
-        <button
-          onClick={onToggleMute}
-          className="flex gap-[4px] items-center cursor-pointer transition-opacity hover:opacity-70"
-        >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/images/speaker-off-icon.svg"
-            alt="Mute"
-            className={`w-[20px] h-[20px] flex-shrink-0 ${isMuted ? "opacity-50" : ""}`}
-          />
-          <p className="font-medium text-[16px] leading-normal text-white text-center whitespace-nowrap">
-            {isMuted ? "Unmute" : "Mute"}
-          </p>
-        </button>
       </div>
     </div>
   );
