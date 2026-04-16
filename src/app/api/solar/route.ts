@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
 
     const res = await fetch(
       `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation&current=shortwave_radiation&forecast_days=1`,
-      { next: { revalidate: 900 } } // cache 15 minutes
+      { next: { revalidate: 300 } } // cache 5 minutes
     );
 
     if (!res.ok) {

@@ -29,7 +29,7 @@ export function useSolarData(lat: number, lon: number): SolarData {
     }
 
     fetchSolarData();
-    const interval = setInterval(fetchSolarData, 15 * 60 * 1000);
+    const interval = setInterval(fetchSolarData, 5 * 60 * 1000);
     return () => clearInterval(interval);
   }, [lat, lon]);
 
