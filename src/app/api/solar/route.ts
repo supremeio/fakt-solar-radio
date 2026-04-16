@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     const lon = parseFloat(searchParams.get("lon") ?? "4.9");
 
     const res = await fetch(
-      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation&forecast_days=1`,
+      `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&hourly=shortwave_radiation&current=shortwave_radiation&forecast_days=1`,
       { next: { revalidate: 900 } } // cache 15 minutes
     );
 
@@ -16,12 +16,10 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await res.json();
-    const hourlyRadiation: number[] = data.hourly?.shortwave_radiation ?? [];
-
-    // Get current hour's irradiance
-    const now = new Date();
-    const currentHour = now.getUTCHours() + 1; // Amsterdam is UTC+1 (approximate)
-    const currentIrradiance = hourlyRadiation[currentHour] ?? 0;
+    const currentIrradiance: number =
+      data.current?.shortwave_radiation ?? 0;
+    const hourlyRadiation: number[] =
+      data.hourly?.shortwave_radiation ?? [];
 
     return NextResponse.json({
       currentIrradiance,
