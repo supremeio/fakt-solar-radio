@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
   try {
     const res = await fetch(
-      `https://de1.api.radio-browser.info/json/stations/search?tag=${tag}&limit=20&order=votes&reverse=true&hidebroken=true&has_extended_info=true`,
+      `https://de1.api.radio-browser.info/json/stations/search?tag=${tag}&limit=50&order=votes&reverse=true&hidebroken=true&has_extended_info=true&lastcheckok=1`,
       {
         headers: { "User-Agent": "FAKTSolarRadio/1.0" },
         next: { revalidate: 3600 },
@@ -26,10 +26,14 @@ export async function GET(request: Request) {
     const stations = await res.json();
 
     // Filter for stations with working URLs and good metadata
+    const BROWSER_CODECS = ["MP3", "AAC", "AAC+", "OGG", "OPUS"];
     const filtered = stations
       .filter(
         (s: { url_resolved: string; name: string; codec: string }) =>
-          s.url_resolved && s.name && s.codec !== "UNKNOWN"
+          s.url_resolved &&
+          s.name &&
+          s.codec !== "UNKNOWN" &&
+          BROWSER_CODECS.includes(s.codec.toUpperCase())
       )
       .map(
         (s: {

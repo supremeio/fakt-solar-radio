@@ -19,6 +19,8 @@ interface UseRadioStreamReturn {
   prevStation: () => void;
 }
 
+const MAX_RETRIES = 10;
+
 export function useRadioStream(genre: string): UseRadioStreamReturn {
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [stationIndex, setStationIndex] = useState(0);
@@ -27,30 +29,38 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
   const [volume, setVolumeState] = useState(0.75);
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const currentGenreRef = useRef(genre);
+  const retriesRef = useRef(0);
 
   // Fetch stations when genre changes
   useEffect(() => {
     if (!genre) return;
-    currentGenreRef.current = genre;
+
+    const controller = new AbortController();
 
     async function fetchStations() {
       setLoading(true);
       try {
-        const res = await fetch(`/api/radio?genre=${encodeURIComponent(genre)}`);
+        const res = await fetch(
+          `/api/radio?genre=${encodeURIComponent(genre)}`,
+          { signal: controller.signal }
+        );
         const data = await res.json();
-        if (currentGenreRef.current === genre && data.stations?.length > 0) {
+        if (data.stations?.length > 0) {
           setStations(data.stations);
           setStationIndex(0);
+          retriesRef.current = 0;
         }
       } catch {
-        // Keep current stations on error
+        // Keep current stations on error or abort
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) {
+          setLoading(false);
+        }
       }
     }
 
     fetchStations();
+    return () => controller.abort();
   }, [genre]);
 
   // Manage audio element
@@ -76,12 +86,17 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
     const wasPlaying = isPlaying;
     audio.src = station.url;
     audio.muted = isMuted;
+    audio.volume = volume;
 
     if (wasPlaying) {
       audio.play().catch(() => {
-        // Stream might fail, try next station
-        if (stations.length > 1) {
-          setStationIndex((prev) => (prev + 1) % stations.length);
+        // Only retry up to MAX_RETRIES to prevent rapid cycling
+        if (stations.length > 1 && retriesRef.current < MAX_RETRIES) {
+          retriesRef.current += 1;
+          // Small delay before trying next station to prevent flickering
+          setTimeout(() => {
+            setStationIndex((prev) => (prev + 1) % stations.length);
+          }, 500);
         }
       });
     }
@@ -110,10 +125,13 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
     if (!audio.src || audio.src !== station.url) {
       audio.src = station.url;
     }
+    retriesRef.current = 0;
     audio.play().catch(() => {
-      // Try next station if current fails
-      if (stations.length > 1) {
-        setStationIndex((prev) => (prev + 1) % stations.length);
+      if (stations.length > 1 && retriesRef.current < MAX_RETRIES) {
+        retriesRef.current += 1;
+        setTimeout(() => {
+          setStationIndex((prev) => (prev + 1) % stations.length);
+        }, 500);
       }
     });
     setIsPlaying(true);
@@ -142,11 +160,13 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
 
   const nextStation = useCallback(() => {
     if (stations.length === 0) return;
+    retriesRef.current = 0;
     setStationIndex((prev) => (prev + 1) % stations.length);
   }, [stations.length]);
 
   const prevStation = useCallback(() => {
     if (stations.length === 0) return;
+    retriesRef.current = 0;
     setStationIndex((prev) => (prev - 1 + stations.length) % stations.length);
   }, [stations.length]);
 

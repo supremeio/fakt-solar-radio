@@ -13,9 +13,13 @@ export function useSolarData(lat: number, lon: number): SolarData {
   });
 
   useEffect(() => {
+    const controller = new AbortController();
+
     async function fetchSolarData() {
       try {
-        const res = await fetch(`/api/solar?lat=${lat}&lon=${lon}`);
+        const res = await fetch(`/api/solar?lat=${lat}&lon=${lon}`, {
+          signal: controller.signal,
+        });
         const json = await res.json();
         const mood = getSolarMood(json.currentIrradiance);
         setData({
@@ -24,13 +28,16 @@ export function useSolarData(lat: number, lon: number): SolarData {
           ...mood,
         });
       } catch {
-        // Keep default values on error
+        // Keep default values on error or abort
       }
     }
 
     fetchSolarData();
     const interval = setInterval(fetchSolarData, 5 * 60 * 1000);
-    return () => clearInterval(interval);
+    return () => {
+      controller.abort();
+      clearInterval(interval);
+    };
   }, [lat, lon]);
 
   return data;
