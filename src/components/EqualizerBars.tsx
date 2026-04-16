@@ -4,6 +4,14 @@ import { motion } from "framer-motion";
 
 const BAR_HEIGHTS = [20, 30, 14, 24];
 
+// Fixed keyframe multipliers per bar to avoid Math.random() hydration mismatches
+const BAR_KEYFRAMES = [
+  [1, 0.4, 0.7, 0.85, 1],
+  [1, 0.55, 0.3, 0.9, 1],
+  [1, 0.8, 0.45, 0.6, 1],
+  [1, 0.35, 0.75, 0.5, 1],
+];
+
 interface EqualizerBarsProps {
   isPlaying: boolean;
 }
@@ -19,13 +27,7 @@ export default function EqualizerBars({ isPlaying }: EqualizerBarsProps) {
           animate={
             isPlaying
               ? {
-                  height: [
-                    height,
-                    height * 0.3 + Math.random() * height * 0.9,
-                    height * 0.6,
-                    height * 0.2 + Math.random() * height,
-                    height,
-                  ],
+                  height: BAR_KEYFRAMES[i].map((m) => height * m),
                 }
               : { height: height * 0.25 }
           }

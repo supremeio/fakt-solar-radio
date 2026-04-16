@@ -58,6 +58,7 @@ export default function SolarRadio() {
                   <SongInfo
                     stationName={radio.currentStation?.name ?? "Solar radio"}
                     isPlaying={radio.isPlaying}
+                    searching={radio.loading || radio.searching}
                   />
                 </div>
 

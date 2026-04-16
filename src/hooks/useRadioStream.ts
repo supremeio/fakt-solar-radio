@@ -10,6 +10,7 @@ interface UseRadioStreamReturn {
   currentStation: RadioStation | null;
   stations: RadioStation[];
   loading: boolean;
+  searching: boolean;
   play: () => void;
   pause: () => void;
   togglePlay: () => void;
@@ -28,6 +29,7 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
   const [isMuted, setIsMuted] = useState(false);
   const [volume, setVolumeState] = useState(0.75);
   const [loading, setLoading] = useState(false);
+  const [searching, setSearching] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retriesRef = useRef(0);
 
@@ -69,11 +71,13 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
       audioRef.current = new Audio();
       audioRef.current.crossOrigin = "anonymous";
     }
+    const audio = audioRef.current;
+    const onPlaying = () => setSearching(false);
+    audio.addEventListener("playing", onPlaying);
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-      }
+      audio.removeEventListener("playing", onPlaying);
+      audio.pause();
+      audio.src = "";
     };
   }, []);
 
@@ -89,14 +93,16 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
     audio.volume = volume;
 
     if (wasPlaying) {
+      setSearching(true);
       audio.play().catch(() => {
         // Only retry up to MAX_RETRIES to prevent rapid cycling
         if (stations.length > 1 && retriesRef.current < MAX_RETRIES) {
           retriesRef.current += 1;
-          // Small delay before trying next station to prevent flickering
           setTimeout(() => {
             setStationIndex((prev) => (prev + 1) % stations.length);
           }, 500);
+        } else {
+          setSearching(false);
         }
       });
     }
@@ -126,12 +132,15 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
       audio.src = station.url;
     }
     retriesRef.current = 0;
+    setSearching(true);
     audio.play().catch(() => {
       if (stations.length > 1 && retriesRef.current < MAX_RETRIES) {
         retriesRef.current += 1;
         setTimeout(() => {
           setStationIndex((prev) => (prev + 1) % stations.length);
         }, 500);
+      } else {
+        setSearching(false);
       }
     });
     setIsPlaying(true);
@@ -179,6 +188,7 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
     currentStation,
     stations,
     loading,
+    searching,
     play,
     pause,
     togglePlay,
