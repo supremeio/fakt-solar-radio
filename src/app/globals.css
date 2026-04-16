@@ -1,6 +1,17 @@
 @import "tailwindcss";
 
 @theme inline {
+  --color-wood-dark: #5D3A1A;
+  --color-wood: #8B5E3C;
+  --color-wood-light: #A67C52;
+  --color-dial-black: #1A1A1A;
+  --color-cream: #F5E6D3;
+  --color-cream-dark: #D9C4A9;
+  --color-amber: #D4A04A;
+  --color-amber-light: #E8C06A;
+  --color-needle: #E85D26;
+  --color-linen: #EDE4D8;
+  --color-ivory: #F0ECE4;
   --color-white-10: rgba(255, 255, 255, 0.1);
   --color-white-20: rgba(255, 255, 255, 0.2);
   --color-white-30: rgba(255, 255, 255, 0.3);

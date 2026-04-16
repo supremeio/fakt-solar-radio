@@ -6,6 +6,7 @@ import type { RadioStation } from "@/lib/types";
 interface UseRadioStreamReturn {
   isPlaying: boolean;
   isMuted: boolean;
+  volume: number;
   currentStation: RadioStation | null;
   stations: RadioStation[];
   loading: boolean;
@@ -13,6 +14,7 @@ interface UseRadioStreamReturn {
   pause: () => void;
   togglePlay: () => void;
   toggleMute: () => void;
+  setVolume: (v: number) => void;
   nextStation: () => void;
   prevStation: () => void;
 }
@@ -22,6 +24,7 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
   const [stationIndex, setStationIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolumeState] = useState(0.75);
   const [loading, setLoading] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const currentGenreRef = useRef(genre);
@@ -92,6 +95,13 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
     }
   }, [isMuted]);
 
+  // Sync volume
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume]);
+
   const play = useCallback(() => {
     const audio = audioRef.current;
     const station = stations[stationIndex];
@@ -126,6 +136,10 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
     setIsMuted((prev) => !prev);
   }, []);
 
+  const setVolume = useCallback((v: number) => {
+    setVolumeState(Math.max(0, Math.min(1, v)));
+  }, []);
+
   const nextStation = useCallback(() => {
     if (stations.length === 0) return;
     setStationIndex((prev) => (prev + 1) % stations.length);
@@ -141,6 +155,7 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
   return {
     isPlaying,
     isMuted,
+    volume,
     currentStation,
     stations,
     loading,
@@ -148,6 +163,7 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
     pause,
     togglePlay,
     toggleMute,
+    setVolume,
     nextStation,
     prevStation,
   };

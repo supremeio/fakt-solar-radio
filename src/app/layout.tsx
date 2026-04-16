@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
-import { Figtree } from "next/font/google";
+import { Figtree, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const figtree = Figtree({
   subsets: ["latin"],
   weight: ["500", "700"],
   variable: "--font-figtree",
+  display: "swap",
+});
+
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-playfair",
   display: "swap",
 });
 
@@ -20,8 +27,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${figtree.variable} h-full`}>
-      <body className="min-h-full bg-black font-[family-name:var(--font-figtree)]">
+    <html lang="en" className={`${figtree.variable} ${playfair.variable} h-full`}>
+      <body className="min-h-full bg-linen font-[family-name:var(--font-figtree)]">
         {children}
       </body>
     </html>

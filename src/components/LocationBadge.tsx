@@ -1,5 +1,8 @@
+"use client";
+
 import { LOCATIONS } from "@/lib/constants";
 import type { Location } from "@/lib/constants";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface LocationBadgeProps {
   location: Location;
@@ -10,47 +13,81 @@ export default function LocationBadge({
   location,
   onLocationChange,
 }: LocationBadgeProps) {
+  const currentIndex = LOCATIONS.findIndex((l) => l.id === location.id);
+
+  const handlePrev = () => {
+    const newIndex =
+      (currentIndex - 1 + LOCATIONS.length) % LOCATIONS.length;
+    onLocationChange(LOCATIONS[newIndex]);
+  };
+
+  const handleNext = () => {
+    const newIndex = (currentIndex + 1) % LOCATIONS.length;
+    onLocationChange(LOCATIONS[newIndex]);
+  };
+
   return (
-    <div className="flex gap-[8px] items-center opacity-40 relative">
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/location-pin.svg"
-        alt=""
-        className="w-[16px] h-[16px] flex-shrink-0"
-      />
-      <p className="font-medium text-[16px] leading-normal text-white text-center whitespace-nowrap">
-        {location.name}
-      </p>
-      <svg
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-        className="w-[24px] h-[24px] flex-shrink-0"
-      >
-        <path
-          d="M6 9L12 15L18 9"
-          stroke="white"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <select
-        value={location.id}
-        onChange={(e) => {
-          const selected = LOCATIONS.find((l) => l.id === e.target.value);
-          if (selected) onLocationChange(selected);
+    <div className="flex items-center gap-[8px] md:gap-[12px]">
+      <button
+        onClick={handlePrev}
+        className="w-[28px] h-[28px] md:w-[32px] md:h-[32px] rounded-[4px] flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+        style={{
+          backgroundColor: "#F0ECE4",
+          boxShadow:
+            "0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 2px rgba(0,0,0,0.1)",
         }}
-        className="absolute inset-0 opacity-0 cursor-pointer"
       >
-        {LOCATIONS.map((loc) => (
-          <option key={loc.id} value={loc.id}>
-            {loc.name}
-          </option>
-        ))}
-      </select>
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path
+            d="M6.5 2L3.5 5L6.5 8"
+            stroke="#5D3A1A"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
+
+      <div
+        className="min-w-[120px] md:min-w-[140px] h-[28px] md:h-[32px] rounded-[4px] flex items-center justify-center px-[10px] overflow-hidden"
+        style={{
+          backgroundColor: "rgba(0,0,0,0.15)",
+          boxShadow: "inset 0 1px 3px rgba(0,0,0,0.2)",
+        }}
+      >
+        <AnimatePresence mode="wait">
+          <motion.span
+            key={location.id}
+            className="text-[11px] md:text-[12px] text-cream/70 font-medium whitespace-nowrap"
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.2 }}
+          >
+            {location.name}
+          </motion.span>
+        </AnimatePresence>
+      </div>
+
+      <button
+        onClick={handleNext}
+        className="w-[28px] h-[28px] md:w-[32px] md:h-[32px] rounded-[4px] flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+        style={{
+          backgroundColor: "#F0ECE4",
+          boxShadow:
+            "0 2px 4px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 2px rgba(0,0,0,0.1)",
+        }}
+      >
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+          <path
+            d="M3.5 2L6.5 5L3.5 8"
+            stroke="#5D3A1A"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      </button>
     </div>
   );
 }

@@ -22,36 +22,63 @@ export default function SolarRadio() {
   const radio = useRadioStream(genre);
 
   return (
-    <div className="relative w-full min-h-screen overflow-y-auto overflow-x-hidden bg-black">
+    <div className="relative w-full min-h-screen overflow-y-auto overflow-x-hidden">
       <Background irradiance={currentIrradiance} />
 
-      {/* Main content container - centered */}
-      <div className="relative z-10 flex items-center justify-center w-full min-h-screen py-[40px] px-[24px]">
-        <div className="flex flex-col gap-[40px] items-center w-full max-w-[447.5px]">
-          {/* Location badge - at top */}
-          <LocationBadge location={location} onLocationChange={setLocation} />
+      <div className="relative z-10 flex items-center justify-center w-full min-h-screen py-[32px] px-[16px] md:px-[24px]">
+        <div className="flex flex-col items-center w-full max-w-[520px]">
+          {/* Radio outer frame */}
+          <div
+            className="w-full rounded-[18px] p-[6px] md:p-[8px]"
+            style={{
+              background:
+                "linear-gradient(180deg, #C09A6E 0%, #A07848 30%, #8B5E3C 60%, #6B4520 100%)",
+              boxShadow:
+                "0 12px 40px rgba(0,0,0,0.35), 0 4px 12px rgba(0,0,0,0.2)",
+            }}
+          >
+            {/* Radio inner body */}
+            <div
+              className="w-full rounded-[14px] overflow-hidden"
+              style={{
+                background: `
+                  repeating-linear-gradient(90deg, transparent 0px, transparent 3px, rgba(0,0,0,0.018) 3px, rgba(0,0,0,0.018) 6px),
+                  repeating-linear-gradient(180deg, transparent 0px, transparent 50px, rgba(0,0,0,0.015) 50px, rgba(0,0,0,0.015) 52px),
+                  linear-gradient(180deg, #A67C52 0%, #96693F 10%, #8B5E3C 25%, #9B6B45 40%, #8B5E3C 55%, #A07050 70%, #8B5E3C 85%, #7A4F30 100%)
+                `,
+              }}
+            >
+              <div className="px-[14px] pt-[14px] pb-[12px] md:px-[20px] md:pt-[20px] md:pb-[16px] flex flex-col">
+                {/* Dial panel */}
+                <SolarGauge value={currentIrradiance} />
 
-          {/* Glass card */}
-          <div className="flex flex-col gap-[24px] items-center px-[16px] py-[32px] md:px-[24px] md:py-[40px] w-full bg-white/10 rounded-[24px]">
-            <SolarGauge value={currentIrradiance} />
+                {/* Station info area */}
+                <div className="flex flex-col items-center gap-[16px] py-[24px] md:py-[28px]">
+                  <RadioDetails genre={genre} description={description} />
+                  <SongInfo
+                    stationName={radio.currentStation?.name ?? "Solar radio"}
+                    isPlaying={radio.isPlaying}
+                  />
+                </div>
 
-            <div className="flex flex-col gap-[40px] items-center w-full max-w-[290px]">
-              <RadioDetails genre={genre} description={description} />
-              <SongInfo
-                stationName={radio.currentStation?.name ?? "Solar radio"}
-                isPlaying={radio.isPlaying}
-              />
-              <PlayerControls
-                isPlaying={radio.isPlaying}
-                isMuted={radio.isMuted}
-                onTogglePlay={radio.togglePlay}
-                onToggleMute={radio.toggleMute}
-              />
+                {/* Forecast panel */}
+                <ForecastChart hourlyData={hourlyForecast} />
+
+                {/* Controls: knobs + location presets */}
+                <PlayerControls
+                  isPlaying={radio.isPlaying}
+                  volume={radio.volume}
+                  onTogglePlay={radio.togglePlay}
+                  onVolumeChange={radio.setVolume}
+                >
+                  <LocationBadge
+                    location={location}
+                    onLocationChange={setLocation}
+                  />
+                </PlayerControls>
+              </div>
             </div>
           </div>
-
-          {/* Forecast section */}
-          <ForecastChart hourlyData={hourlyForecast} />
         </div>
       </div>
     </div>

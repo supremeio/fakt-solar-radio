@@ -2,7 +2,7 @@
 
 import { motion } from "framer-motion";
 
-const BAR_HEIGHTS = [24.96, 37.44, 15.6, 21.84];
+const BAR_HEIGHTS = [20, 30, 14, 24];
 
 interface EqualizerBarsProps {
   isPlaying: boolean;
@@ -10,11 +10,12 @@ interface EqualizerBarsProps {
 
 export default function EqualizerBars({ isPlaying }: EqualizerBarsProps) {
   return (
-    <div className="flex gap-[4.68px] items-start shrink-0">
+    <div className="flex gap-[3px] items-end shrink-0 h-[30px]">
       {BAR_HEIGHTS.map((height, i) => (
         <motion.div
           key={i}
-          className="bg-white w-[6.24px] rounded-[62.4px]"
+          className="w-[5px] rounded-[2px]"
+          style={{ backgroundColor: "#D4A04A" }}
           animate={
             isPlaying
               ? {
@@ -26,7 +27,7 @@ export default function EqualizerBars({ isPlaying }: EqualizerBarsProps) {
                     height,
                   ],
                 }
-              : { height: height * 0.3 }
+              : { height: height * 0.25 }
           }
           transition={
             isPlaying
