@@ -12,6 +12,49 @@ export function getSolarMood(irradiance: number) {
 
 export const MAX_IRRADIANCE = 1000;
 
+export const SOLAR_ACTIVITIES: Record<string, string[]> = {
+  Ambient: [
+    "Settle in with a long book",
+    "Brew something warm and slow",
+    "Cook a proper meal, unhurried",
+    "Put on a slow album and rest your eyes",
+    "Write a letter or long email",
+    "Light a candle, dim the room",
+    "Call someone you haven't in a while",
+    "Watch the light fade through the window",
+  ],
+  Jazz: [
+    "Linger over coffee",
+    "Take a slow walk outside",
+    "Sketch or journal for a few minutes",
+    "Water your plants",
+    "Plan something for later",
+    "Tidy a single corner of your space",
+    "Text a friend a good song",
+    "Catch the golden hour if it's near",
+  ],
+  Pop: [
+    "Meet a friend for lunch",
+    "Move your body outside",
+    "Tackle something creative",
+    "Bike somewhere new",
+    "Run errands on foot",
+    "Shoot a few photos on the way",
+    "Try a café you've never visited",
+    "Read in a park",
+  ],
+  Electronic: [
+    "Find shade or step inside",
+    "Cool off with water",
+    "Take a lazy siesta",
+    "Keep sipping water",
+    "Snack on something fresh and cold",
+    "Wear a hat if you head out",
+    "Put a fan on, curtains drawn",
+    "Save the heavy work for later",
+  ],
+};
+
 export const LOCATIONS = [
   { id: "amsterdam", name: "Amsterdam, NL", lat: 52.37, lon: 4.9 },
   { id: "london", name: "London, UK", lat: 51.51, lon: -0.13 },

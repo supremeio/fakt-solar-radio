@@ -15,6 +15,7 @@ import LocationBadge from "./LocationBadge";
 import HeroHeader from "./HeroHeader";
 import ConnectorCaption from "./ConnectorCaption";
 import HowItWorks from "./HowItWorks";
+import ActivitySuggestions from "./ActivitySuggestions";
 import IntroOverlay from "./IntroOverlay";
 
 export default function SolarRadio() {
@@ -41,7 +42,7 @@ export default function SolarRadio() {
           />
 
           {/* Radio + explainer side-by-side on desktop, stacked on mobile */}
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-[20px] md:gap-[24px] w-full">
+          <div className="flex flex-col md:flex-row items-center md:items-stretch gap-[20px] md:gap-[24px] w-full">
           {/* Radio outer frame */}
           <div
             className="w-full max-w-[520px] md:flex-1 md:max-w-none rounded-[18px] p-[6px] md:p-[8px]"
@@ -103,9 +104,16 @@ export default function SolarRadio() {
             </div>
           </div>
 
-          {/* How it works explainer card */}
-          <div className="w-full max-w-[520px] md:flex-1 md:max-w-none md:mt-0">
+          {/* Right column: explainer + activity suggestions */}
+          <div className="w-full max-w-[520px] md:flex-1 md:max-w-none flex flex-col gap-[20px] md:gap-[24px] md:min-h-0">
             <HowItWorks city={location.name} currentGenre={genre} />
+            <div className="md:flex-1 md:min-h-0 flex">
+              <ActivitySuggestions
+                irradiance={currentIrradiance}
+                description={description}
+                genre={genre}
+              />
+            </div>
           </div>
           </div>
         </div>
