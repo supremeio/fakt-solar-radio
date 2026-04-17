@@ -18,7 +18,8 @@ const playfair = Playfair_Display({
 
 export const metadata: Metadata = {
   title: "FAKT Solar Radio",
-  description: "A solar-powered radio experience",
+  description:
+    "Live internet radio where the genre changes with the sun's intensity at your chosen city.",
 };
 
 export default function RootLayout({

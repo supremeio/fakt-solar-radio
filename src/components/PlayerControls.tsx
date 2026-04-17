@@ -25,7 +25,7 @@ const DIMPLE_STYLE = {
 const MIN_ANGLE = -135;
 const MAX_ANGLE = 135;
 
-function PowerKnob({
+function PowerSwitch({
   isActive,
   onClick,
 }: {
@@ -33,18 +33,51 @@ function PowerKnob({
   onClick: () => void;
 }) {
   return (
-    <div className="flex flex-col items-center gap-[6px]">
+    <div className="flex flex-col items-center gap-[8px]">
       <button
         onClick={onClick}
-        className="relative w-[52px] h-[52px] md:w-[60px] md:h-[60px] rounded-full cursor-pointer active:scale-95 transition-transform"
-        style={KNOB_STYLE}
+        aria-pressed={isActive}
+        aria-label="Power"
+        className="relative w-[56px] h-[34px] md:w-[64px] md:h-[38px] rounded-[6px] cursor-pointer transition-all duration-200"
+        style={{
+          backgroundColor: "#F0ECE4",
+          boxShadow: isActive
+            ? "inset 0 2px 4px rgba(0,0,0,0.35), inset 0 -1px 1px rgba(255,255,255,0.3), 0 1px 0 rgba(255,255,255,0.4)"
+            : "0 3px 6px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.85), inset 0 -1px 2px rgba(0,0,0,0.12)",
+          transform: isActive ? "translateY(1px)" : "translateY(0)",
+        }}
       >
-        <div className="absolute inset-[22%] rounded-full" style={DIMPLE_STYLE} />
-        <div
-          className="absolute inset-0 transition-transform duration-500 ease-out"
-          style={{ transform: `rotate(${isActive ? 120 : -120}deg)` }}
-        >
-          <div className="absolute top-[5px] left-1/2 -translate-x-1/2 w-[2px] h-[10px] md:h-[12px] bg-[#444] rounded-full" />
+        <div className="flex items-center justify-center gap-[6px] h-full px-[2px]">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 14 14"
+            fill="none"
+            aria-hidden="true"
+          >
+            <path
+              d="M7 2.2 L7 6.4"
+              stroke="#5D3A1A"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
+            <path
+              d="M3.8 4.4 A4 4 0 1 0 10.2 4.4"
+              stroke="#5D3A1A"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              fill="none"
+            />
+          </svg>
+          <div
+            className="w-[6px] h-[6px] rounded-full transition-all duration-300"
+            style={{
+              backgroundColor: isActive ? "#EF4444" : "#8B5E3C",
+              boxShadow: isActive
+                ? "0 0 6px rgba(239, 68, 68, 0.9), inset 0 -1px 1px rgba(0,0,0,0.2)"
+                : "inset 0 1px 2px rgba(0,0,0,0.4)",
+            }}
+          />
         </div>
       </button>
       <span className="text-[9px] md:text-[10px] text-cream/40 uppercase tracking-[0.15em] font-medium">
@@ -144,7 +177,7 @@ export default function PlayerControls({
 }: PlayerControlsProps) {
   return (
     <div className="flex items-center justify-between w-full pt-[20px] md:pt-[24px] pb-[4px]">
-      <PowerKnob isActive={isPlaying} onClick={onTogglePlay} />
+      <PowerSwitch isActive={isPlaying} onClick={onTogglePlay} />
       <div className="flex-1 flex justify-center px-[8px]">{children}</div>
       <VolumeKnob volume={volume} onVolumeChange={onVolumeChange} />
     </div>
