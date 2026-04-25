@@ -2,7 +2,8 @@ export interface SolarData {
   currentIrradiance: number;
   hourlyForecast: number[];
   description: string;
-  genre: string;
+  bucketIndex: number;
+  bucketName: string;
 }
 
 export interface RadioStation {

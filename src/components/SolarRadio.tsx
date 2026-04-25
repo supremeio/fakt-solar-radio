@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { LOCATIONS } from "@/lib/constants";
+import { useState, useEffect } from "react";
+import { LOCATIONS, GENRE_PRESETS, resolveSubgenre } from "@/lib/constants";
 import type { Location } from "@/lib/constants";
 import { useSolarData } from "@/hooks/useSolarData";
 import { useRadioStream } from "@/hooks/useRadioStream";
@@ -12,19 +12,49 @@ import SongInfo from "./SongInfo";
 import PlayerControls from "./PlayerControls";
 import ForecastChart from "./ForecastChart";
 import LocationBadge from "./LocationBadge";
+import GenreBadge from "./GenreBadge";
 import HeroHeader from "./HeroHeader";
 import ConnectorCaption from "./ConnectorCaption";
 import HowItWorks from "./HowItWorks";
 import ActivitySuggestions from "./ActivitySuggestions";
 import IntroOverlay from "./IntroOverlay";
 
+const GENRE_STORAGE_KEY = "fakt-solar-radio:preferred-genre";
+
 export default function SolarRadio() {
   const [location, setLocation] = useState<Location>(LOCATIONS[0]);
+  const [preferredGenre, setPreferredGenre] = useState<string>("auto");
 
-  const { currentIrradiance, hourlyForecast, description, genre } =
+  // Hydrate preferred genre from localStorage after mount (avoids SSR mismatch)
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(GENRE_STORAGE_KEY);
+      if (saved && GENRE_PRESETS.some((p) => p.id === saved)) {
+        setPreferredGenre(saved);
+      }
+    } catch {
+      // localStorage unavailable — stay on default
+    }
+  }, []);
+
+  const handleGenreChange = (id: string) => {
+    setPreferredGenre(id);
+    try {
+      localStorage.setItem(GENRE_STORAGE_KEY, id);
+    } catch {
+      // ignore
+    }
+  };
+
+  const { currentIrradiance, hourlyForecast, description, bucketIndex, bucketName } =
     useSolarData(location.lat, location.lon);
 
-  const radio = useRadioStream(genre);
+  const { tag, displayName, presetName } = resolveSubgenre(
+    preferredGenre,
+    bucketIndex
+  );
+
+  const radio = useRadioStream(tag);
 
   return (
     <div className="relative w-full min-h-screen overflow-y-auto overflow-x-hidden">
@@ -38,7 +68,7 @@ export default function SolarRadio() {
           <HeroHeader
             city={location.name}
             description={description}
-            genre={genre}
+            displayName={displayName}
           />
 
           {/* Radio + explainer side-by-side on desktop, stacked on mobile */}
@@ -65,6 +95,18 @@ export default function SolarRadio() {
               }}
             >
               <div className="px-[14px] pt-[14px] pb-[12px] md:px-[20px] md:pt-[20px] md:pb-[16px] flex flex-col">
+                {/* Top tuner row: genre + city pickers */}
+                <div className="flex flex-col items-center gap-[8px] md:gap-[10px] pb-[14px] md:pb-[16px]">
+                  <GenreBadge
+                    presetId={preferredGenre}
+                    onPresetChange={handleGenreChange}
+                  />
+                  <LocationBadge
+                    location={location}
+                    onLocationChange={setLocation}
+                  />
+                </div>
+
                 {/* Dial panel */}
                 <SolarGauge value={currentIrradiance} />
 
@@ -72,12 +114,12 @@ export default function SolarRadio() {
                 <ConnectorCaption
                   value={currentIrradiance}
                   description={description}
-                  genre={genre}
+                  displayName={displayName}
                 />
 
                 {/* Station info area */}
                 <div className="flex flex-col items-center gap-[16px] pt-[16px] pb-[24px] md:pt-[18px] md:pb-[28px]">
-                  <RadioDetails genre={genre} description={description} />
+                  <RadioDetails displayName={displayName} description={description} />
                   <SongInfo
                     stationName={radio.currentStation?.name ?? "Solar radio"}
                     isPlaying={radio.isPlaying}
@@ -88,30 +130,30 @@ export default function SolarRadio() {
                 {/* Forecast panel */}
                 <ForecastChart hourlyData={hourlyForecast} />
 
-                {/* Controls: knobs + location presets */}
+                {/* Controls: power + volume knobs */}
                 <PlayerControls
                   isPlaying={radio.isPlaying}
                   volume={radio.volume}
                   onTogglePlay={radio.togglePlay}
                   onVolumeChange={radio.setVolume}
-                >
-                  <LocationBadge
-                    location={location}
-                    onLocationChange={setLocation}
-                  />
-                </PlayerControls>
+                />
               </div>
             </div>
           </div>
 
           {/* Right column: explainer + activity suggestions */}
           <div className="w-full max-w-[520px] md:flex-1 md:max-w-none flex flex-col gap-[20px] md:gap-[24px] md:min-h-0">
-            <HowItWorks city={location.name} currentGenre={genre} />
+            <HowItWorks
+              city={location.name}
+              presetId={preferredGenre}
+              presetName={presetName}
+              bucketIndex={bucketIndex}
+            />
             <div className="md:flex-1 md:min-h-0 flex">
               <ActivitySuggestions
                 irradiance={currentIrradiance}
                 description={description}
-                genre={genre}
+                bucketName={bucketName}
               />
             </div>
           </div>

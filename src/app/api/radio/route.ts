@@ -1,20 +1,12 @@
 import { NextResponse } from "next/server";
 
-const GENRE_TAG_MAP: Record<string, string> = {
-  Ambient: "ambient",
-  Jazz: "jazz",
-  Pop: "pop",
-  Electronic: "electronic",
-};
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const genre = searchParams.get("genre") ?? "jazz";
-  const tag = GENRE_TAG_MAP[genre] ?? genre.toLowerCase();
+  const tag = (searchParams.get("genre") ?? "ambient").toLowerCase();
 
   try {
     const res = await fetch(
-      `https://de1.api.radio-browser.info/json/stations/search?tag=${tag}&limit=50&order=votes&reverse=true&hidebroken=true&has_extended_info=true&lastcheckok=1`,
+      `https://de1.api.radio-browser.info/json/stations/search?tag=${encodeURIComponent(tag)}&limit=50&order=votes&reverse=true&hidebroken=true&lastcheckok=1`,
       {
         headers: { "User-Agent": "FAKTSolarRadio/1.0" },
         next: { revalidate: 3600 },

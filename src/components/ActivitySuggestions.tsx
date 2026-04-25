@@ -3,16 +3,16 @@ import { SOLAR_ACTIVITIES } from "@/lib/constants";
 interface ActivitySuggestionsProps {
   irradiance: number;
   description: string;
-  genre: string;
+  bucketName: string;
 }
 
 export default function ActivitySuggestions({
   irradiance,
   description,
-  genre,
+  bucketName,
 }: ActivitySuggestionsProps) {
   const activities =
-    SOLAR_ACTIVITIES[genre] ?? SOLAR_ACTIVITIES.Ambient;
+    SOLAR_ACTIVITIES[bucketName] ?? SOLAR_ACTIVITIES.Quiet;
 
   return (
     <div

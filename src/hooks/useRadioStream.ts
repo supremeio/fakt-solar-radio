@@ -22,7 +22,7 @@ interface UseRadioStreamReturn {
 
 const MAX_RETRIES = 10;
 
-export function useRadioStream(genre: string): UseRadioStreamReturn {
+export function useRadioStream(tag: string): UseRadioStreamReturn {
   const [stations, setStations] = useState<RadioStation[]>([]);
   const [stationIndex, setStationIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -33,9 +33,9 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const retriesRef = useRef(0);
 
-  // Fetch stations when genre changes
+  // Fetch stations when tag changes
   useEffect(() => {
-    if (!genre) return;
+    if (!tag) return;
 
     const controller = new AbortController();
 
@@ -43,7 +43,7 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
       setLoading(true);
       try {
         const res = await fetch(
-          `/api/radio?genre=${encodeURIComponent(genre)}`,
+          `/api/radio?genre=${encodeURIComponent(tag)}`,
           { signal: controller.signal }
         );
         const data = await res.json();
@@ -63,7 +63,7 @@ export function useRadioStream(genre: string): UseRadioStreamReturn {
 
     fetchStations();
     return () => controller.abort();
-  }, [genre]);
+  }, [tag]);
 
   // Manage audio element
   useEffect(() => {

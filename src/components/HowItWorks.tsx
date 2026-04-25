@@ -1,17 +1,22 @@
-const ZONES = [
-  { min: 0, max: 100, name: "Quiet", genre: "Ambient" },
-  { min: 100, max: 300, name: "Waking", genre: "Jazz" },
-  { min: 300, max: 600, name: "Shining", genre: "Pop" },
-  { min: 600, max: Infinity, name: "Blazing", genre: "Electronic" },
-];
+import { GENRE_PRESETS, SOLAR_BUCKETS } from "@/lib/constants";
 
 interface HowItWorksProps {
   city: string;
-  currentGenre: string;
+  presetId: string;
+  presetName: string;
+  bucketIndex: number;
 }
 
-export default function HowItWorks({ city, currentGenre }: HowItWorksProps) {
+export default function HowItWorks({
+  city,
+  presetId,
+  presetName,
+  bucketIndex,
+}: HowItWorksProps) {
   const cityShort = city.split(",")[0];
+  const preset =
+    GENRE_PRESETS.find((p) => p.id === presetId) ?? GENRE_PRESETS[0];
+  const isAuto = preset.id === "auto";
 
   return (
     <div
@@ -30,19 +35,32 @@ export default function HowItWorks({ city, currentGenre }: HowItWorksProps) {
           How it works
         </p>
         <p className="text-[13px] md:text-[14px] text-cream/75 mt-[4px] mb-[14px] md:mb-[16px] leading-snug">
-          The sun&apos;s intensity where you tune in picks the genre. Four
-          moods, live from {cityShort}.
+          {isAuto ? (
+            <>
+              The sun&apos;s intensity in {cityShort} picks a genre. Four moods,
+              live.
+            </>
+          ) : (
+            <>
+              You picked{" "}
+              <span className="text-cream font-medium">{presetName}</span>. The
+              sun in {cityShort} shapes its mood — calmer at dawn, brighter at
+              noon.
+            </>
+          )}
         </p>
         <div className="flex flex-col gap-[6px]">
-          {ZONES.map((z) => {
-            const isActive = z.genre === currentGenre;
+          {SOLAR_BUCKETS.map((b, i) => {
+            const prevMax = i === 0 ? 0 : SOLAR_BUCKETS[i - 1].max;
+            const isActive = i === bucketIndex;
             const rangeLabel =
-              z.max === Infinity
-                ? `${z.min}+ W/m²`
-                : `${z.min}–${z.max} W/m²`;
+              b.max === Infinity
+                ? `${prevMax}+ W/m²`
+                : `${prevMax}–${b.max} W/m²`;
+            const subgenreName = preset.buckets[i].name;
             return (
               <div
-                key={z.genre}
+                key={b.name}
                 className="flex items-center justify-between gap-[10px] px-[12px] py-[8px] md:px-[14px] md:py-[10px] rounded-[8px] transition-all duration-300"
                 style={{
                   backgroundColor: isActive
@@ -58,7 +76,7 @@ export default function HowItWorks({ city, currentGenre }: HowItWorksProps) {
                     isActive ? "text-cream" : "text-cream/50"
                   }`}
                 >
-                  {z.name}
+                  {b.name}
                 </span>
                 <span
                   className={`text-[10px] md:text-[11px] tabular-nums flex-1 text-center ${
@@ -68,11 +86,11 @@ export default function HowItWorks({ city, currentGenre }: HowItWorksProps) {
                   {rangeLabel}
                 </span>
                 <span
-                  className={`text-[13px] md:text-[14px] font-medium min-w-[72px] text-right ${
+                  className={`text-[13px] md:text-[14px] font-medium min-w-[88px] text-right ${
                     isActive ? "text-amber-light" : "text-cream/50"
                   }`}
                 >
-                  {z.genre}
+                  {subgenreName}
                 </span>
               </div>
             );
