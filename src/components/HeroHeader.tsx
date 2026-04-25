@@ -1,16 +1,16 @@
 interface HeroHeaderProps {
   city: string;
   description: string;
-  genre: string;
+  displayName: string;
 }
 
 export default function HeroHeader({
   city,
   description,
-  genre,
+  displayName,
 }: HeroHeaderProps) {
   const cityShort = city.split(",")[0];
-  const narrative = `Right now in ${cityShort}, ${description.toLowerCase()} — playing ${genre}.`;
+  const narrative = `Right now in ${cityShort}, ${description.toLowerCase()} — playing ${displayName}.`;
 
   return (
     <div className="flex flex-col items-center gap-[8px] md:gap-[10px] text-center w-full max-w-[520px] mb-[20px] md:mb-[28px]">

@@ -178,7 +178,11 @@ export default function PlayerControls({
   return (
     <div className="flex items-center justify-between w-full pt-[20px] md:pt-[24px] pb-[4px]">
       <PowerSwitch isActive={isPlaying} onClick={onTogglePlay} />
-      <div className="flex-1 flex justify-center px-[8px]">{children}</div>
+      {children ? (
+        <div className="flex-1 flex justify-center px-[8px]">{children}</div>
+      ) : (
+        <div className="flex-1" />
+      )}
       <VolumeKnob volume={volume} onVolumeChange={onVolumeChange} />
     </div>
   );

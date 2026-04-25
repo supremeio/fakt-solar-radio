@@ -73,9 +73,10 @@ export default function IntroOverlay() {
                   Music shaped by the sun
                 </h2>
                 <p className="text-[14px] md:text-[15px] text-cream/75 leading-relaxed">
-                  Solar Radio streams live internet stations where the genre
-                  changes with real-time solar irradiance at your chosen city.
-                  Quiet sun plays ambient; a blazing sun plays electronic.
+                  Pick a genre — Solar Radio streams live stations within it,
+                  where the sun&apos;s intensity at your chosen city shapes the
+                  mood. Calmer sounds at dawn, brighter ones at noon. Or leave
+                  it on Auto and let the sun pick everything.
                 </p>
                 <button
                   onClick={dismiss}

@@ -1,15 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { getSolarMood } from "@/lib/constants";
+import { getSolarBucket, getSolarBucketIndex } from "@/lib/constants";
 import type { SolarData } from "@/lib/types";
 
 export function useSolarData(lat: number, lon: number): SolarData {
-  const [data, setData] = useState<SolarData>({
-    currentIrradiance: 25,
-    hourlyForecast: new Array(25).fill(0),
-    description: "The sun is quiet",
-    genre: "Jazz",
+  const [data, setData] = useState<SolarData>(() => {
+    const initialIrradiance = 25;
+    const bucket = getSolarBucket(initialIrradiance);
+    return {
+      currentIrradiance: initialIrradiance,
+      hourlyForecast: new Array(25).fill(0),
+      description: bucket.description,
+      bucketIndex: getSolarBucketIndex(initialIrradiance),
+      bucketName: bucket.name,
+    };
   });
 
   useEffect(() => {
@@ -21,11 +26,14 @@ export function useSolarData(lat: number, lon: number): SolarData {
           signal: controller.signal,
         });
         const json = await res.json();
-        const mood = getSolarMood(json.currentIrradiance);
+        const irradiance = json.currentIrradiance;
+        const bucket = getSolarBucket(irradiance);
         setData({
-          currentIrradiance: json.currentIrradiance,
+          currentIrradiance: irradiance,
           hourlyForecast: json.hourlyForecast,
-          ...mood,
+          description: bucket.description,
+          bucketIndex: getSolarBucketIndex(irradiance),
+          bucketName: bucket.name,
         });
       } catch {
         // Keep default values on error or abort

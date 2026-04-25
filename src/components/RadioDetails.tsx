@@ -1,10 +1,10 @@
 interface RadioDetailsProps {
-  genre: string;
+  displayName: string;
   description: string;
 }
 
 export default function RadioDetails({
-  genre,
+  displayName,
   description,
 }: RadioDetailsProps) {
   return (
@@ -14,7 +14,7 @@ export default function RadioDetails({
       </p>
       <div className="flex flex-col items-center gap-[4px]">
         <p className="font-[family-name:var(--font-playfair)] font-bold text-[36px] md:text-[42px] text-cream leading-tight">
-          {genre}
+          {displayName}
         </p>
         <p className="text-[14px] md:text-[16px] text-cream/50 font-medium">
           {description}

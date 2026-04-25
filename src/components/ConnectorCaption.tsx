@@ -1,13 +1,13 @@
 interface ConnectorCaptionProps {
   value: number;
   description: string;
-  genre: string;
+  displayName: string;
 }
 
 export default function ConnectorCaption({
   value,
   description,
-  genre,
+  displayName,
 }: ConnectorCaptionProps) {
   return (
     <div className="flex items-center justify-center flex-wrap gap-x-[8px] md:gap-x-[10px] gap-y-[2px] text-[10px] md:text-[11px] mt-[14px] md:mt-[18px]">
@@ -20,7 +20,7 @@ export default function ConnectorCaption({
       </span>
       <span className="text-cream/25">→</span>
       <span className="text-cream/80 font-medium uppercase tracking-[0.12em]">
-        {genre}
+        {displayName}
       </span>
     </div>
   );
