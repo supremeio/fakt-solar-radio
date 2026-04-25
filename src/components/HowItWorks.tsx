@@ -1,10 +1,13 @@
 import { GENRE_PRESETS, SOLAR_BUCKETS } from "@/lib/constants";
+import type { TasteBucketTuple } from "@/lib/constants";
 
 interface HowItWorksProps {
   city: string;
   presetId: string;
   presetName: string;
   bucketIndex: number;
+  buckets: TasteBucketTuple;
+  avoidedCount: number;
 }
 
 export default function HowItWorks({
@@ -12,11 +15,14 @@ export default function HowItWorks({
   presetId,
   presetName,
   bucketIndex,
+  buckets,
+  avoidedCount,
 }: HowItWorksProps) {
   const cityShort = city.split(",")[0];
   const preset =
     GENRE_PRESETS.find((p) => p.id === presetId) ?? GENRE_PRESETS[0];
   const isAuto = preset.id === "auto";
+  const isCustom = preset.id === "custom";
 
   return (
     <div
@@ -37,8 +43,13 @@ export default function HowItWorks({
         <p className="text-[13px] md:text-[14px] text-cream/75 mt-[4px] mb-[14px] md:mb-[16px] leading-snug">
           {isAuto ? (
             <>
-              The sun&apos;s intensity in {cityShort} picks a genre. Four moods,
-              live.
+              The sun&apos;s intensity in {cityShort} picks a genre. Avoided
+              styles are skipped.
+            </>
+          ) : isCustom ? (
+            <>
+              Your solar mix is active. The sun in {cityShort} picks from your
+              four chosen moods.
             </>
           ) : (
             <>
@@ -47,6 +58,12 @@ export default function HowItWorks({
               sun in {cityShort} shapes its mood — calmer at dawn, brighter at
               noon.
             </>
+          )}
+          {avoidedCount > 0 && (
+            <span className="text-amber-light">
+              {" "}
+              {avoidedCount} style{avoidedCount === 1 ? "" : "s"} avoided.
+            </span>
           )}
         </p>
         <div className="flex flex-col gap-[6px]">
@@ -57,7 +74,7 @@ export default function HowItWorks({
               b.max === Infinity
                 ? `${prevMax}+ W/m²`
                 : `${prevMax}–${b.max} W/m²`;
-            const subgenreName = preset.buckets[i].name;
+            const subgenreName = buckets[i].name;
             return (
               <div
                 key={b.name}

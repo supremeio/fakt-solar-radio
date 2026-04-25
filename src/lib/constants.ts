@@ -23,11 +23,46 @@ export interface GenrePresetBucket {
   tag: string;
 }
 
+export type TasteBucketTuple = [
+  GenrePresetBucket,
+  GenrePresetBucket,
+  GenrePresetBucket,
+  GenrePresetBucket,
+];
+
 export interface GenrePreset {
   id: string;
   name: string;
-  buckets: [GenrePresetBucket, GenrePresetBucket, GenrePresetBucket, GenrePresetBucket];
+  buckets: TasteBucketTuple;
 }
+
+export const CUSTOM_PRESET_ID = "custom";
+
+export const MUSIC_OPTIONS: GenrePresetBucket[] = [
+  { name: "Ambient", tag: "ambient" },
+  { name: "Lo-Fi", tag: "lofi" },
+  { name: "Jazz", tag: "jazz" },
+  { name: "Soul", tag: "soul" },
+  { name: "Folk", tag: "folk" },
+  { name: "Pop", tag: "pop" },
+  { name: "Rock", tag: "rock" },
+  { name: "Electronic", tag: "electronic" },
+  { name: "House", tag: "house" },
+  { name: "Techno", tag: "techno" },
+  { name: "Hip-Hop", tag: "hip hop" },
+  { name: "Classical", tag: "classical" },
+  { name: "Reggae", tag: "reggae" },
+  { name: "Blues", tag: "blues" },
+  { name: "Country", tag: "country" },
+  { name: "Metal", tag: "metal" },
+];
+
+export const DEFAULT_CUSTOM_BUCKETS: TasteBucketTuple = [
+  { name: "Ambient", tag: "ambient" },
+  { name: "Lo-Fi", tag: "lofi" },
+  { name: "Pop", tag: "pop" },
+  { name: "Electronic", tag: "electronic" },
+];
 
 export const GENRE_PRESETS: GenrePreset[] = [
   {
@@ -39,6 +74,11 @@ export const GENRE_PRESETS: GenrePreset[] = [
       { name: "Pop", tag: "pop" },
       { name: "Electronic", tag: "electronic" },
     ],
+  },
+  {
+    id: CUSTOM_PRESET_ID,
+    name: "My Solar Mix",
+    buckets: DEFAULT_CUSTOM_BUCKETS,
   },
   {
     id: "blues",
@@ -128,12 +168,90 @@ export interface ResolvedSubgenre {
   presetName: string;
 }
 
+function fallbackBucket(avoidedTags: string[]): GenrePresetBucket {
+  return (
+    MUSIC_OPTIONS.find((option) => !isBucketAvoided(option, avoidedTags)) ??
+    MUSIC_OPTIONS[0]
+  );
+}
+
+function isBucketAvoided(
+  bucket: GenrePresetBucket,
+  avoidedTags: string[]
+): boolean {
+  const bucketTag = bucket.tag.toLowerCase();
+  const bucketName = bucket.name.toLowerCase();
+  return avoidedTags.some((tag) => {
+    const option = MUSIC_OPTIONS.find((item) => item.tag === tag);
+    const optionName = option?.name.toLowerCase() ?? tag;
+    return (
+      bucketTag === tag ||
+      bucketTag.includes(tag) ||
+      bucketName.includes(optionName)
+    );
+  });
+}
+
+export function normalizeTasteBuckets(
+  buckets: unknown
+): TasteBucketTuple {
+  if (!Array.isArray(buckets)) return DEFAULT_CUSTOM_BUCKETS;
+
+  const normalized = buckets.slice(0, 4).map((bucket, index) => {
+    if (
+      bucket &&
+      typeof bucket === "object" &&
+      "tag" in bucket &&
+      typeof bucket.tag === "string"
+    ) {
+      const option = MUSIC_OPTIONS.find((o) => o.tag === bucket.tag);
+      if (option) return option;
+    }
+    return DEFAULT_CUSTOM_BUCKETS[index];
+  });
+
+  while (normalized.length < 4) {
+    normalized.push(DEFAULT_CUSTOM_BUCKETS[normalized.length]);
+  }
+
+  return normalized as TasteBucketTuple;
+}
+
+export function normalizeAvoidedTags(tags: unknown): string[] {
+  if (!Array.isArray(tags)) return [];
+  return tags.filter(
+    (tag): tag is string =>
+      typeof tag === "string" && MUSIC_OPTIONS.some((o) => o.tag === tag)
+  );
+}
+
+export function resolveBucketWithAvoids(
+  buckets: TasteBucketTuple,
+  bucketIndex: number,
+  avoidedTags: string[]
+): GenrePresetBucket {
+  const bucket = buckets[bucketIndex] ?? buckets[0];
+  if (!isBucketAvoided(bucket, avoidedTags)) return bucket;
+
+  const optionIndex = MUSIC_OPTIONS.findIndex((option) => option.tag === bucket.tag);
+  for (let offset = 1; offset <= MUSIC_OPTIONS.length; offset += 1) {
+    const option = MUSIC_OPTIONS[(Math.max(optionIndex, 0) + offset) % MUSIC_OPTIONS.length];
+    if (!isBucketAvoided(option, avoidedTags)) return option;
+  }
+
+  return fallbackBucket(avoidedTags);
+}
+
 export function resolveSubgenre(
   presetId: string,
-  bucketIndex: number
+  bucketIndex: number,
+  customBuckets: TasteBucketTuple = DEFAULT_CUSTOM_BUCKETS,
+  avoidedTags: string[] = []
 ): ResolvedSubgenre {
   const preset = GENRE_PRESETS.find((p) => p.id === presetId) ?? GENRE_PRESETS[0];
-  const bucket = preset.buckets[bucketIndex] ?? preset.buckets[0];
+  const buckets =
+    preset.id === CUSTOM_PRESET_ID ? customBuckets : preset.buckets;
+  const bucket = resolveBucketWithAvoids(buckets, bucketIndex, avoidedTags);
   return {
     tag: bucket.tag,
     displayName: bucket.name,

@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { LOCATIONS, GENRE_PRESETS, resolveSubgenre } from "@/lib/constants";
-import type { Location } from "@/lib/constants";
+import {
+  DEFAULT_CUSTOM_BUCKETS,
+  GENRE_PRESETS,
+  LOCATIONS,
+  normalizeAvoidedTags,
+  normalizeTasteBuckets,
+  resolveBucketWithAvoids,
+  resolveSubgenre,
+} from "@/lib/constants";
+import type { Location, TasteBucketTuple } from "@/lib/constants";
 import { useSolarData } from "@/hooks/useSolarData";
 import { useRadioStream } from "@/hooks/useRadioStream";
 import Background from "./Background";
@@ -18,12 +26,18 @@ import ConnectorCaption from "./ConnectorCaption";
 import HowItWorks from "./HowItWorks";
 import ActivitySuggestions from "./ActivitySuggestions";
 import IntroOverlay from "./IntroOverlay";
+import TasteEditor from "./TasteEditor";
 
 const GENRE_STORAGE_KEY = "fakt-solar-radio:preferred-genre";
+const CUSTOM_BUCKETS_STORAGE_KEY = "fakt-solar-radio:custom-buckets";
+const AVOIDED_TAGS_STORAGE_KEY = "fakt-solar-radio:avoided-tags";
 
 export default function SolarRadio() {
   const [location, setLocation] = useState<Location>(LOCATIONS[0]);
   const [preferredGenre, setPreferredGenre] = useState<string>("auto");
+  const [customBuckets, setCustomBuckets] =
+    useState<TasteBucketTuple>(DEFAULT_CUSTOM_BUCKETS);
+  const [avoidedTags, setAvoidedTags] = useState<string[]>([]);
 
   // Hydrate preferred genre from localStorage after mount (avoids SSR mismatch)
   useEffect(() => {
@@ -32,8 +46,18 @@ export default function SolarRadio() {
       if (saved && GENRE_PRESETS.some((p) => p.id === saved)) {
         setPreferredGenre(saved);
       }
+
+      const savedBuckets = localStorage.getItem(CUSTOM_BUCKETS_STORAGE_KEY);
+      if (savedBuckets) {
+        setCustomBuckets(normalizeTasteBuckets(JSON.parse(savedBuckets)));
+      }
+
+      const savedAvoided = localStorage.getItem(AVOIDED_TAGS_STORAGE_KEY);
+      if (savedAvoided) {
+        setAvoidedTags(normalizeAvoidedTags(JSON.parse(savedAvoided)));
+      }
     } catch {
-      // localStorage unavailable — stay on default
+      // localStorage unavailable or malformed — stay on defaults
     }
   }, []);
 
@@ -46,13 +70,40 @@ export default function SolarRadio() {
     }
   };
 
+  const handleCustomBucketsChange = (buckets: TasteBucketTuple) => {
+    setCustomBuckets(buckets);
+    try {
+      localStorage.setItem(CUSTOM_BUCKETS_STORAGE_KEY, JSON.stringify(buckets));
+    } catch {
+      // ignore
+    }
+  };
+
+  const handleAvoidedTagsChange = (tags: string[]) => {
+    setAvoidedTags(tags);
+    try {
+      localStorage.setItem(AVOIDED_TAGS_STORAGE_KEY, JSON.stringify(tags));
+    } catch {
+      // ignore
+    }
+  };
+
   const { currentIrradiance, hourlyForecast, description, bucketIndex, bucketName } =
     useSolarData(location.lat, location.lon);
 
   const { tag, displayName, presetName } = resolveSubgenre(
     preferredGenre,
-    bucketIndex
+    bucketIndex,
+    customBuckets,
+    avoidedTags
   );
+  const activePreset =
+    GENRE_PRESETS.find((p) => p.id === preferredGenre) ?? GENRE_PRESETS[0];
+  const baseBuckets =
+    activePreset.id === "custom" ? customBuckets : activePreset.buckets;
+  const resolvedBuckets = baseBuckets.map((_, index) =>
+    resolveBucketWithAvoids(baseBuckets, index, avoidedTags)
+  ) as TasteBucketTuple;
 
   const radio = useRadioStream(tag);
 
@@ -101,6 +152,14 @@ export default function SolarRadio() {
                     presetId={preferredGenre}
                     onPresetChange={handleGenreChange}
                   />
+                  <TasteEditor
+                    presetId={preferredGenre}
+                    customBuckets={customBuckets}
+                    avoidedTags={avoidedTags}
+                    onPresetChange={handleGenreChange}
+                    onCustomBucketsChange={handleCustomBucketsChange}
+                    onAvoidedTagsChange={handleAvoidedTagsChange}
+                  />
                   <LocationBadge
                     location={location}
                     onLocationChange={setLocation}
@@ -148,6 +207,8 @@ export default function SolarRadio() {
               presetId={preferredGenre}
               presetName={presetName}
               bucketIndex={bucketIndex}
+              buckets={resolvedBuckets}
+              avoidedCount={avoidedTags.length}
             />
             <div className="md:flex-1 md:min-h-0 flex">
               <ActivitySuggestions
